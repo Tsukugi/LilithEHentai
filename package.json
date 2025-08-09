@@ -1,0 +1,51 @@
+{
+    "name": "@atsu/lilith-ehentai",
+    "version": "0.0.1",
+    "main": "./dist/main.umd.bundle.js",
+    "exports": {
+        "types": "./dist/index.d.ts",
+        "node": {
+            "import": "./dist/main.commonjs2.bundle.cjs",
+            "require": "./dist/main.commonjs.bundle.cjs"
+        },
+        "default": "./dist/main.umd.bundle.js"
+    },
+    "types": "./dist/index.d.ts",
+    "author": "Tsukugi",
+    "license": "MIT",
+    "description": "EHentai implementation for Lilith",
+    "scripts": {
+        "compile": "tsc",
+        "test": "jest --config jest.config.js",
+        "lint": "eslint src --ext .ts --fix",
+        "prettier:check": "npx prettier --check .",
+        "prettier:write": "npx prettier --write .",
+        "webpack:build": "npx webpack --mode=production",
+        "webpack:watch": "npx webpack --mode=development --watch",
+        "build": "npm run webpack:build",
+        "build:prod": "npm run test && npm run prettier:write && npm run lint && npm run webpack:build",
+        "prepare": "npm run build"
+    },
+    "dependencies": {
+        "@atsu/lilith": "github:Tsukugi/Lilith"
+    },
+    "devDependencies": {
+        "@jest/globals": "^29.7.0",
+        "@types/node": "^14.14.45",
+        "@typescript-eslint/eslint-plugin": "^6.9.1",
+        "@typescript-eslint/parser": "^6.9.1",
+        "cheerio": "^1.1.2",
+        "dotenv": "^16.3.1",
+        "eslint": "^7.17.0",
+        "eslint-config-prettier": "^8.3.0",
+        "jest": "^29.7.0",
+        "node-fetch": "^2.6.7",
+        "prettier": "2.4.1",
+        "ts-jest": "^29.1.1",
+        "ts-loader": "^9.2.6",
+        "typescript": "^5.6.2",
+        "webpack": "^5.58.1",
+        "webpack-cli": "^4.9.0",
+        "webpack-node-externals": "^3.0.0"
+    }
+}

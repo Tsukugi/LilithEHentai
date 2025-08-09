@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "es6",
+        "target": "es6",
+        "moduleResolution": "Bundler",
+        "lib": ["es2019"],
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "declaration": true
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["src/tests", "node_modules"]
+}
