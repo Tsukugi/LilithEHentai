@@ -13,6 +13,7 @@
     "types": "./dist/index.d.ts",
     "author": "Tsukugi",
     "license": "MIT",
+    "private": true,
     "description": "EHentai implementation for Lilith",
     "scripts": {
         "compile": "tsc",
@@ -47,5 +48,9 @@
         "webpack": "^5.58.1",
         "webpack-cli": "^4.9.0",
         "webpack-node-externals": "^3.0.0"
+    },
+    "repository": "git://github.com/Tsukugi/LilithEHentai.git",
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
     }
 }
