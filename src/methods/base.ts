@@ -113,16 +113,24 @@ const getGalleries = ({ props, document }: GetGalleriesProps): BookBase[] => {
         throw new LilithError(404, "No search results found");
     }
 
+    const getBookid = (href: string) => {
+        let bookId = href?.replace(`${props.domains.galleryBaseUrl}/`, "");
+        // Handle trailing slash (more readable than lastIndexOf)
+        if (bookId && bookId.endsWith("/")) {
+            bookId = bookId.slice(0, -1);
+        }
+
+        // Safely handle empty string → null
+        bookId = bookId || null;
+
+        return bookId;
+    };
     // Filtering and mapping gallery elements to book objects
     return galleries
         .filter((el) => !!el.find("a")?.getAttribute("href"))
         .map((searchElement) => {
             try {
                 const href = searchElement.find("a").getAttribute("href");
-                const bookId =
-                    href
-                        ?.replace(`${props.domains.galleryBaseUrl}/`, "")
-                        .trimEnd() || null;
 
                 const src =
                     searchElement.find("img")?.getAttribute("src") || null;
@@ -145,7 +153,7 @@ const getGalleries = ({ props, document }: GetGalleriesProps): BookBase[] => {
 
                 // Constructing and returning the book object
                 return {
-                    id: bookId,
+                    id: getBookid(href),
                     cover: cover,
                     title,
                     availableLanguages,
