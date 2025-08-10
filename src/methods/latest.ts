@@ -18,7 +18,7 @@ export const useEHentaiGetLatestBooksMethod = (
         request,
     } = props;
 
-    const { getGalleries } = useEHentaiMethods();
+    const { getGalleries } = useEHentaiMethods(props);
 
     /**
      * Function for fetching the latest EHentai books for a specific page.

@@ -4,12 +4,19 @@ import {
     LilithError,
     LilithImage,
     Sort,
+    Book,
 } from "@atsu/lilith";
 
 import { UseDomParserImpl } from "../interfaces/domParser";
-import { EHentaiLanguage, EHentaiTag, GetGalleriesProps } from "../interfaces";
+import {
+    EHentaiLanguage,
+    EHentaiTag,
+    GetGalleriesProps,
+    UseEHentaiMethodProps,
+} from "../interfaces";
 import { DateUtils } from "../utils/date";
 import { RequestUtils } from "../utils/request";
+import { PromiseTools } from "../utils/promise";
 
 /*
  *  This is the size that will define a Page in Search
@@ -185,7 +192,135 @@ const getTagsFromGallery = (
 /**
  * EHentaiBase object containing various utilities related to EHentai integration.
  */
-export const useEHentaiMethods = () => {
+export const useEHentaiMethods = (props: UseEHentaiMethodProps) => {
+    const {
+        request,
+        domains: { galleryBaseUrl },
+    } = props;
+    const { getEpoch } = DateUtils;
+
+    const getNextPage = async (id: string, extraPage = 1) => {
+        // Extra page is the page 2 onwards
+        const response = await request(`${galleryBaseUrl}/${id}`, [
+            ["p", extraPage],
+        ]);
+        const document = await response.getDocument();
+        const imagesSelector = "#gdt a";
+        const newPageImages = document
+            .findAll(imagesSelector)
+            .map((image) => image.getAttribute("href"));
+        return newPageImages;
+    };
+
+    const extractUrl = (str: string) => {
+        const regex = /url\((https?:\/\/[^\s]+)\)/;
+        return str.match(regex) ? str.match(regex)[1] : null;
+    };
+
+    const getBook = async (id: string): Promise<Book> => {
+        const response = await request(`${galleryBaseUrl}/${id}`);
+        const document = await response.getDocument();
+
+        const coverSelector = "#gd1 div";
+        const uri = RequestUtils.sanitizeImageSrc(
+            extractUrl(document.find(coverSelector).getAttribute("style")),
+        );
+
+        const imagesSelector = "#gdt a";
+        let images = document
+            .findAll(imagesSelector)
+            .map((image) => image.getAttribute("href"));
+
+        const getGalleryTags = (type: string) =>
+            getTagsFromGallery(type, document, ".gt");
+
+        const totalPages: number = +Array.from(document.findAll(".gdt2"))
+            .map((d) => d.getText())
+            .find((d) => d.includes("pages"))
+            .replace(" pages", "");
+
+        if (totalPages > 20) {
+            // This means we have multiple pages
+            const pages = Math.ceil(totalPages / 20); // 52 pages should give 3 pages
+            const promises = Array.from(new Array(pages - 1)) // We remove one as we already have the first
+                .fill(null)
+                .map((_, index) => async () => getNextPage(id, index + 1)); // We add one to start from the p = 1
+
+            await PromiseTools.recursivePromiseChain({
+                promises,
+                onPromiseSettled: async (result) => {
+                    images = [...images, ...result];
+                },
+            });
+        }
+
+        const tags = Array.from(document.findAll(".gtl1")).map((d) => ({
+            id: d.getText(), //We really dont have ids it seems
+            name: d.getText(),
+        }));
+        const title = document.find("h1#gn").getText();
+
+        const artistTags = getGalleryTags("artist");
+        const author: string =
+            artistTags.length > 0 ? artistTags[0] : "unknown";
+
+        const availableLanguages = getGalleryTags("language")
+            .filter((d) => LanguageMapper[d] !== undefined) // Keep only valid keys
+            .map((d) => LanguageMapper[d]) || [LilithLanguage.japanese]; // Convert keys to actual LilithLanguage objects // Fallback to Japanese if empty
+
+        const language = availableLanguages[0];
+
+        return {
+            cover: { uri },
+            title,
+            tags,
+            author,
+            id,
+            availableLanguages,
+            savedAt: getEpoch(),
+            chapters: [
+                {
+                    id,
+                    title,
+                    language,
+                    chapterNumber: 1,
+                    pages: await loadImages(images),
+                    savedAt: getEpoch(),
+                },
+            ],
+        };
+    };
+
+    /**
+     * Method to get the image inside a single webpage
+     * @param srcImage
+     * @returns
+     */
+    const getImage = async (srcImage: string): Promise<string> => {
+        const res = await request(srcImage);
+        const document = await res.getDocument();
+
+        const image = document.find("img#img").getAttribute("src");
+        console.warn(image);
+        return image;
+    };
+
+    const loadImages = async (images: string[]): Promise<LilithImage[]> => {
+        const promises = images.map((i) => async () => await getImage(i));
+
+        let scrappedImages = [];
+
+        // Do it sequentially so you dont strain their servers
+        await PromiseTools.recursivePromiseChain({
+            promises,
+            onPromiseSettled: async (result) => {
+                scrappedImages = [...scrappedImages, result];
+            },
+        });
+
+        return scrappedImages;
+    };
+
     return {
         EHentaiPageResultSize,
         LanguageMapper,
@@ -194,5 +329,7 @@ export const useEHentaiMethods = () => {
         getLanguageFromTags,
         getGalleries,
         getTagsFromGallery,
+        getBook,
+        loadImages,
     };
 };

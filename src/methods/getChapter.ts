@@ -1,14 +1,17 @@
 import { GetChapter, Chapter } from "@atsu/lilith";
 import { useEHentaiMethods } from "./base";
 import { DateUtils } from "../utils/date";
+import { UseEHentaiMethodProps } from "../interfaces";
 
 /**
  * Hook for interacting with EHentai chapters.
  * @param {UseEHentaiMethodProps} props - Properties required for the hook.
  * @returns {GetChapter} - A function that retrieves information about a chapter based on its identifier.
  */
-export const useEHentaiGetChapterMethod = (): GetChapter => {
-    const { LanguageMapper } = useEHentaiMethods();
+export const useEHentaiGetChapterMethod = (
+    props: UseEHentaiMethodProps,
+): GetChapter => {
+    const { LanguageMapper, getBook } = useEHentaiMethods(props);
 
     const { getEpoch } = DateUtils;
 
@@ -20,10 +23,8 @@ export const useEHentaiGetChapterMethod = (): GetChapter => {
      */
     return async (chapterId: string): Promise<Chapter> => {
         try {
-            /**
-             * EHentai doesn't use chapters; it directly gets the pages from the book as 1 chapter books.
-             */
-            throw new Error("No chapter supported");
+            const book = await getBook(chapterId); // They are the same as books
+            return book.chapters[0];
         } catch (error) {
             console.error(error);
             return {

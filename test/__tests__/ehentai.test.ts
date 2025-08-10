@@ -1,11 +1,6 @@
 import { beforeEach, describe, expect, test } from "@jest/globals";
 
-import {
-    RepositoryBase,
-    BookListResults,
-    Book,
-    BookBase,
-} from "@atsu/lilith";
+import { RepositoryBase, BookListResults, Book, BookBase } from "@atsu/lilith";
 
 import { headers } from "../nhentaiMock";
 import { useCheerioDomParser } from "../../src/impl/useCheerioDomParser";
@@ -31,23 +26,22 @@ describe("Lilith", () => {
 
         test("GetLatestBooks", async () => {
             const page: BookListResults = await loader.getLatestBooks(1);
-            log(page);
-            expect(page).toBeDefined();
+            log(page.results.map((result) => result.title));
+            expect(page.results).toBeDefined();
         });
-
+        //3476777/85c392f692
         test("getBook", async () => {
-            const book: Book = await loader.getBook("3476777/85c392f692");
-            log(book);
+            const book: Book = await loader.getBook("3478195/952ca87463");
+            log(book.chapters[0].pages);
             expect(book).toBeDefined();
         });
-
+        /*
         test("GetTrendingBooks", async () => {
             const books: BookBase[] = await loader.getTrendingBooks();
             log(books.map((result) => result.title));
             expect(books).toBeDefined();
             expect(books.length).toBeGreaterThan(0);
         });
-        /* 
         test("Search", async () => {
             const search: SearchResult = await loader.search("dva");
             expect(search.results[0].cover.uri).toBeTruthy();

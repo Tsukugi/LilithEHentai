@@ -18,7 +18,7 @@ export const useEHentaiGetTrendingBooksMethod = (
         request,
     } = props;
 
-    const { getGalleries } = useEHentaiMethods();
+    const { getGalleries } = useEHentaiMethods(props);
     return async (): Promise<BookBase[]> => {
         try {
             const response = await request(`${baseUrl}/popular`);

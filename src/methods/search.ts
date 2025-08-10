@@ -28,7 +28,7 @@ export const useEHentaiSearchMethod = (
         options: { debug, requiredLanguages },
         request,
     } = props;
-    const { getGalleries, EHentaiPageResultSize } = useEHentaiMethods();
+    const { getGalleries, EHentaiPageResultSize } = useEHentaiMethods(props);
 
     /**
      * Function for extracting the total number of pages

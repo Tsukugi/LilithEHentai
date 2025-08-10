@@ -49,7 +49,7 @@ export const useEHentaiRepository: RepositoryTemplate = (props) => {
 
     return {
         domains,
-        getChapter: useEHentaiGetChapterMethod(),
+        getChapter: useEHentaiGetChapterMethod(methodProps),
         getBook: useEHentaiGetBookmethod(methodProps),
         search: useEHentaiSearchMethod(methodProps),
         getRandomBook: useEHentaiGetRandomBookMethod(),
