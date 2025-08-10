@@ -130,7 +130,7 @@ const getGalleries = ({ props, document }: GetGalleriesProps): BookBase[] => {
         // Safely handle empty string → null
         bookId = bookId || null;
 
-        return bookId.replace("/", "-");
+        return bookId.replace("/", "-"); // Ids for lilith are abc-def in cases that we have composed ids as abc/def
     };
     // Filtering and mapping gallery elements to book objects
     return galleries
@@ -217,8 +217,10 @@ export const useEHentaiMethods = (props: UseEHentaiMethodProps) => {
         return str.match(regex) ? str.match(regex)[1] : null;
     };
 
-    const getBook = async (id: string): Promise<Book> => {
-        const EHentaiId = id.replace("-", "/");
+    // Ids must be abc-def format for us
+    // Only EHentai uses them as abc/def format
+    const getBook = async (srcId: string): Promise<Book> => {
+        const EHentaiId = srcId.replace("-", "/");
         const response = await request(`${galleryBaseUrl}/${EHentaiId}`);
         const document = await response.getDocument();
 
@@ -273,17 +275,18 @@ export const useEHentaiMethods = (props: UseEHentaiMethodProps) => {
 
         const language = availableLanguages[0];
 
+        const id = srcId.replace("/", "-"); // Ensure correct id
         return {
             cover: { uri },
             title,
             tags,
             author,
-            id: EHentaiId,
+            id,
             availableLanguages,
             savedAt: getEpoch(),
             chapters: [
                 {
-                    id: EHentaiId,
+                    id,
                     title,
                     language,
                     chapterNumber: 1,
