@@ -308,13 +308,13 @@ export const useEHentaiMethods = (props: UseEHentaiMethodProps) => {
     const loadImages = async (images: string[]): Promise<LilithImage[]> => {
         const promises = images.map((i) => async () => await getImage(i));
 
-        let scrappedImages = [];
+        let scrappedImages: LilithImage[] = [];
 
         // Do it sequentially so you dont strain their servers
         await PromiseTools.recursivePromiseChain({
             promises,
             onPromiseSettled: async (result) => {
-                scrappedImages = [...scrappedImages, result];
+                scrappedImages = [...scrappedImages, { uri: result }];
             },
         });
 
