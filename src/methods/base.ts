@@ -130,7 +130,7 @@ const getGalleries = ({ props, document }: GetGalleriesProps): BookBase[] => {
         // Safely handle empty string → null
         bookId = bookId || null;
 
-        return bookId;
+        return bookId.replace("/", "-");
     };
     // Filtering and mapping gallery elements to book objects
     return galleries
@@ -275,7 +275,7 @@ export const useEHentaiMethods = (props: UseEHentaiMethodProps) => {
             title,
             tags,
             author,
-            id,
+            id: id.replace("/", "-"),
             availableLanguages,
             savedAt: getEpoch(),
             chapters: [
