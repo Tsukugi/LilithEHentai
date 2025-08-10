@@ -218,7 +218,8 @@ export const useEHentaiMethods = (props: UseEHentaiMethodProps) => {
     };
 
     const getBook = async (id: string): Promise<Book> => {
-        const response = await request(`${galleryBaseUrl}/${id}`);
+        const EHentaiId = id.replace("-", "/");
+        const response = await request(`${galleryBaseUrl}/${EHentaiId}`);
         const document = await response.getDocument();
 
         const coverSelector = "#gd1 div";
@@ -244,7 +245,9 @@ export const useEHentaiMethods = (props: UseEHentaiMethodProps) => {
             const pages = Math.ceil(totalPages / 20); // 52 pages should give 3 pages
             const promises = Array.from(new Array(pages - 1)) // We remove one as we already have the first
                 .fill(null)
-                .map((_, index) => async () => getNextPage(id, index + 1)); // We add one to start from the p = 1
+                .map(
+                    (_, index) => async () => getNextPage(EHentaiId, index + 1),
+                ); // We add one to start from the p = 1
 
             await PromiseTools.recursivePromiseChain({
                 promises,
@@ -275,12 +278,12 @@ export const useEHentaiMethods = (props: UseEHentaiMethodProps) => {
             title,
             tags,
             author,
-            id: id.replace("/", "-"),
+            id: EHentaiId,
             availableLanguages,
             savedAt: getEpoch(),
             chapters: [
                 {
-                    id,
+                    id: EHentaiId,
                     title,
                     language,
                     chapterNumber: 1,
